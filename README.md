@@ -25,6 +25,10 @@ See `backend/.env.example` for all backend variables. Required integrations are 
 
 Schedule a campaign several minutes ahead, restart Express and the worker, then confirm it remains in `/admin/queues` and sends once at its due time. Set a small `MAX_EMAILS_PER_HOUR_PER_SENDER`, schedule more recipients, and show the rescheduled table/status and Slack alert. Demonstrate global subject/body/recipient search after Elasticsearch indexing completes.
 
+## Demo video
+
+Watch the submitted walkthrough: [Email Scheduler demo recording](https://drive.google.com/file/d/10wBRLHBO0oBMSW02Oxnyp-D1UBb4CZ-o/view?usp=sharing).
+
 ## Submission
 
 Create a private GitHub repository, invite `Mitrajit` and `Yadav036`, then submit the repository and a short demo video through the supplied ClickUp form. The video should cover scheduling, persistence after restart, search, queue board, rate limiting, and Slack alerting.
