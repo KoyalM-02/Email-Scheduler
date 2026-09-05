@@ -1,7 +1,9 @@
 import { getSession } from 'next-auth/react';
 import type { Email, Status } from '../types/email';
 
-const url = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
+// Accept either a backend origin or a complete `/api` URL, avoiding a common deployment configuration mistake.
+const configuredApiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
+const url = `${configuredApiUrl.replace(/\/$/, '')}${configuredApiUrl.replace(/\/$/, '').endsWith('/api') ? '' : '/api'}`;
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const session = await getSession();
