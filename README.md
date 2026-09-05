@@ -5,7 +5,7 @@ A full-stack cold-email scheduler built for the ReachInbox.ai assignment. It use
 ## Quick start
 
 1. Start infrastructure: `cd backend && docker compose up -d`.
-2. Copy `backend/.env.example` to `backend/.env`, add the database URL and SMTP credentials (Ethereal works well for a demo).
+2. Copy `backend/.env.example` to `backend/.env`, add the database URL, Google client ID, and SMTP credentials (Ethereal works well for a demo).
 3. Run `npm install`, `npx prisma migrate dev`, then `npm run dev` in `backend`.
 4. Copy `frontend/.env.local.example` to `frontend/.env.local`, run `npm install && npm run dev` in `frontend`.
 
@@ -13,13 +13,13 @@ Open the dashboard at `http://localhost:3000`, the API at `http://localhost:4000
 
 ## Architecture
 
-`Next.js dashboard -> Express API -> PostgreSQL + Elasticsearch` handles scheduling and read/search views. Scheduling writes a durable `Email` record and enqueues a BullMQ job with a deterministic SHA-256 `jobId`. Redis persists delayed jobs, so restarting the API or worker does not lose scheduled work. The independent BullMQ worker sends with Nodemailer, persists the outcome, and indexes every state change.
+`Next.js dashboard -> Express API -> PostgreSQL + Elasticsearch` handles scheduling and read/search views. Google OpenID Connect ID tokens are verified by Express; email records are always scoped to the signed-in user. Scheduling writes a durable `Email` record and enqueues a BullMQ job with a deterministic SHA-256 `jobId`. Redis persists delayed jobs, so restarting the API or worker does not lose scheduled work. The independent BullMQ worker sends with Nodemailer, persists the outcome, and indexes every state change.
 
-Rate counters use `rate_limit:{sender}:{YYYYMMDDHH}` with Redis `INCR` and a 3600-second TTL. Over-limit jobs are moved to the next hour rather than dropped and are recorded as `RESCHEDULED_RATE_LIMIT`. When a counter reaches the configured threshold, the worker posts a Slack webhook alert if one is configured.
+Rate counters use `rate_limit:{sender}:{YYYYMMDDHH}` and `rate_limit:global:{YYYYMMDDHH}` with Redis `INCR` and a 3600-second TTL. Over-limit jobs use BullMQ's `moveToDelayed` path and are recorded as `RESCHEDULED_RATE_LIMIT`; they are never discarded. A Redis Lua reservation creates one distributed send slot at a time, so the minimum delay is upheld even with multiple worker instances. Campaigns may request a larger delay or lower hourly cap; environment limits remain hard maximums. When a counter reaches its threshold, the worker posts a live Slack incoming-webhook alert if the user has connected Slack.
 
 ## Environment
 
-See `backend/.env.example` for all backend variables. Required production integrations are `DATABASE_URL`, `REDIS_URL`, `ELASTICSEARCH_NODE`, and SMTP credentials. The frontend requires `NEXT_PUBLIC_API_URL`. For real Google sign-in, configure `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, and `NEXTAUTH_SECRET`; the dashboard currently includes an email-based demo session fallback for local development.
+See `backend/.env.example` for all backend variables. Required integrations are `DATABASE_URL`, `REDIS_URL`, `ELASTICSEARCH_NODE`, `GOOGLE_CLIENT_ID`, and SMTP credentials. The frontend requires `NEXT_PUBLIC_API_URL`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, and `NEXTAUTH_SECRET`. Configure a Slack app with the `incoming-webhook` scope and set `SLACK_CLIENT_ID`, `SLACK_CLIENT_SECRET`, and `SLACK_REDIRECT_URI`; Slack's redirect URL must exactly match this value. Use `SMTP_ACCOUNTS_JSON` to configure one or more Ethereal senders.
 
 ## Persistence proof / demo checklist
 

@@ -1,4 +1,6 @@
 import { Router } from 'express';
-import { connectSlack, listEmails, scheduleEmails, search } from '../controllers/email.controller.js';
+import { listEmails, me, scheduleEmails, search, senders } from '../controllers/email.controller.js';
+import { requireGoogleAuth } from '../middleware/auth.js';
 export const emailRouter=Router();
-emailRouter.get('/',listEmails); emailRouter.get('/search',search); emailRouter.post('/schedule',scheduleEmails); emailRouter.post('/slack/connect',connectSlack);
+emailRouter.use(requireGoogleAuth);
+emailRouter.get('/',listEmails); emailRouter.get('/search',search); emailRouter.get('/me',me); emailRouter.get('/senders',senders); emailRouter.post('/schedule',scheduleEmails);

@@ -19,6 +19,7 @@ model User {
   name String?
   image String?
   slackWebhookUrl String?
+  slackAccessToken String?
   emails Email[]
   createdAt DateTime @default(now())
 }
@@ -36,6 +37,8 @@ model Email {
   error String?
   sentAt DateTime?
   attempts Int @default(0)
+  minDelayMs Int @default(2000)
+  hourlyLimit Int?
   user User @relation(fields:[userId], references:[id], onDelete: Cascade)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
