@@ -1,0 +1,9 @@
+{
+  "name": "email-scheduler-backend",
+  "private": true,
+  "scripts": { "dev": "tsx watch src/index.ts", "build": "prisma generate && tsc", "start": "node dist/index.js", "worker": "tsx src/workers/email.worker.ts", "prisma:migrate": "prisma migrate dev" },
+  "dependencies": {
+    "@bull-board/api": "^6.7.10", "@bull-board/express": "^6.7.10", "@elastic/elasticsearch": "^8.17.0", "@prisma/client": "^6.6.0", "@slack/web-api": "^7.9.2", "@slack/webhook": "^7.0.4", "bullmq": "^5.51.0", "cors": "^2.8.5", "dotenv": "^16.5.0", "express": "^4.21.2", "ioredis": "^5.6.1", "nodemailer": "^6.10.1", "zod": "^3.24.3"
+  },
+  "devDependencies": { "@types/cors": "^2.8.17", "@types/express": "^5.0.1", "@types/node": "^22.15.3", "@types/nodemailer": "^6.4.17", "prisma": "^6.6.0", "tsx": "^4.19.3", "typescript": "^5.8.3" }
+}

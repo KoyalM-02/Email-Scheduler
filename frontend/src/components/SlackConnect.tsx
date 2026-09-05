@@ -1,0 +1,2 @@
+'use client'; import { useState } from 'react'; import { api } from '../lib/api';
+export function SlackConnect(){const [connected,setConnected]=useState(false);const connect=async()=>{const url=window.prompt('Paste your Slack Incoming Webhook URL');if(!url)return;try{await api.slack(url);setConnected(true)}catch(e){alert(e instanceof Error?e.message:'Could not connect Slack')}};return <button onClick={connect} className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold">{connected?'Slack connected':'Connect Slack'}</button>}
