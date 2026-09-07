@@ -24,7 +24,18 @@ export const worker=new Worker<EmailJob>(EMAIL_QUEUE,async job=>{
   }
   await reserveSendSlot(Math.max(env.MIN_SEND_DELAY_MS,data.minDelayMs));
   let email=await prisma.email.update({where:{id:data.emailId},data:{status:EmailStatus.SENDING,attempts:{increment:1}}}); await indexEmail(email);
-  try { await deliverEmail(data); email=await prisma.email.update({where:{id:data.emailId},data:{status:EmailStatus.SENT,sentAt:new Date(),error:null}}); await indexEmail(email); }
-  catch(error) { email=await prisma.email.update({where:{id:data.emailId},data:{status:EmailStatus.FAILED,error:error instanceof Error?error.message:'SMTP delivery failed'}}); await indexEmail(email); throw error; }
+  try {
+    await deliverEmail(data);
+    email=await prisma.email.update({where:{id:data.emailId},data:{status:EmailStatus.SENT,sentAt:new Date(),error:null}});
+    await indexEmail(email);
+    console.log(`Email ${email.id} sent to ${data.recipient}.`);
+  }
+  catch(error) {
+    const message=error instanceof Error?error.message:'SMTP delivery failed';
+    console.error(`Email ${data.emailId} failed for ${data.recipient}: ${message}`, error);
+    email=await prisma.email.update({where:{id:data.emailId},data:{status:EmailStatus.FAILED,error:message}});
+    await indexEmail(email);
+    throw error;
+  }
 },{connection:redis,concurrency:env.WORKER_CONCURRENCY});
 worker.on('ready',()=>console.log(`Email worker ready (concurrency ${env.WORKER_CONCURRENCY})`)); worker.on('error',console.error);
