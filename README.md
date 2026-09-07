@@ -119,7 +119,24 @@ Add the backend environment variables in Render rather than committing secrets. 
 
 ## Persistence proof / demo checklist
 
-Schedule a campaign several minutes ahead, restart Express and the worker, then confirm it remains in `/admin/queues` and sends once at its due time. Set a small `MAX_EMAILS_PER_HOUR_PER_SENDER`, schedule more recipients, and show the rescheduled table/status and Slack alert. Demonstrate global subject/body/recipient search after Elasticsearch indexing completes.
+Use this checklist when recording the demo:
+
+- **Scheduling:** compose a campaign, upload a CSV, choose a future start time, and show the records in Scheduled Emails.
+- **Persistence after restart:** restart the API/worker before the due time, reopen Bull Board, and show that the delayed jobs remain queued and are processed once.
+- **Search:** search by recipient, subject, or body and show the matching records.
+- **Queue board:** open `/admin/queues` and show the delayed, active, completed, or failed BullMQ jobs.
+- **Rate limiting:** set a small hourly limit, schedule more recipients than the limit, and show `RESCHEDULED_RATE_LIMIT` records.
+- **Slack alerting:** connect Slack before the rate-limit test and show the incoming-webhook alert when the limit is reached.
+
+For a quick workflow-only recording, set `EMAIL_PROVIDER=demo`; this marks processed jobs as `SENT` without delivering external email. For a real delivery demonstration, use `smtp` or `resend` with valid provider credentials.
+
+The compose form accepts a one-column CSV, for example:
+
+```csv
+recipient
+person-one@example.com
+person-two@example.com
+```
 
 ## Demo video
 
@@ -127,4 +144,4 @@ Watch the submitted walkthrough: [Email Scheduler demo recording](https://drive.
 
 ## Submission
 
-Create a private GitHub repository, invite `Mitrajit` and `Yadav036`, then submit the repository and a short demo video through the supplied ClickUp form. The video should cover scheduling, persistence after restart, search, queue board, rate limiting, and Slack alerting.
+Before submission, confirm that the GitHub repository is private, invite `Mitrajit` and `Yadav036` under **Settings → Collaborators**, and set the Google Drive video sharing to **Anyone with the link → Viewer**. Submit both the repository URL and the demo video URL through the supplied ClickUp form. The README link documents the video, but GitHub cannot verify collaborator invitations or ClickUp submission status.
