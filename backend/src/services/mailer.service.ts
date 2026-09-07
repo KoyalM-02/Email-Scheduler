@@ -24,12 +24,17 @@ async function deliverWithResend(data:{sender:string;recipient:string;subject:st
   return response.json();
 }
 export async function deliverEmail(data:{sender:string;recipient:string;subject:string;body:string}) {
+  if (env.EMAIL_PROVIDER==='demo') return { id: `demo-${Date.now()}` };
   if (env.EMAIL_PROVIDER==='resend') return deliverWithResend(data);
   const account=accountFor(data.sender);
   return transporterFor(account).sendMail({ from:data.sender || account.email, to:data.recipient, subject:data.subject, html:data.body });
 }
 /** Log configuration faults on startup without making the API unavailable. */
 export async function verifySmtpConfiguration() {
+  if (env.EMAIL_PROVIDER==='demo') {
+    console.log('Demo email provider enabled; deliveries will be marked SENT without external delivery.');
+    return;
+  }
   if (env.EMAIL_PROVIDER==='resend') {
     const response = await fetch('https://api.resend.com/domains', { headers: { Authorization: `Bearer ${env.RESEND_API_KEY}` } });
     if (!response.ok) console.error(`Resend API verification failed (${response.status}).`);
