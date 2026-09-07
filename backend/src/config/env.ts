@@ -8,6 +8,7 @@ const schema = z.object({
   ELASTICSEARCH_NODE: z.string().default('http://localhost:9200'),
   ELASTICSEARCH_API_KEY: z.string().default(''), // Added for Elastic Cloud auth
   RESEND_API_KEY: z.string().optional(),
+  RESEND_FROM: z.string().optional(),
   SMTP_HOST: z.string(), 
   SMTP_PORT: z.coerce.number().default(587), 
   SMTP_USER: z.string(), 

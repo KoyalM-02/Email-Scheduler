@@ -10,10 +10,13 @@ function accountFor(sender:string) { return accounts.find(a=>a.email.toLowerCase
 function transporterFor(account:SmtpAccount) { const key=account.email; let transporter=transporters.get(key); if(!transporter){transporter=nodemailer.createTransport({host:account.host,port:account.port,secure:account.port===465,auth:{user:account.user,pass:account.pass},connectionTimeout:10_000,greetingTimeout:10_000,socketTimeout:30_000});transporters.set(key,transporter);} return transporter; }
 export function availableSenders() { return [...new Set([fallback.email,...accounts.map(a=>a.email)])]; }
 async function deliverWithResend(data:{sender:string;recipient:string;subject:string;body:string}) {
+  // Resend permits its onboarding sender for test deliveries to the account
+  // owner. Production domains can override it with RESEND_FROM.
+  const from = env.RESEND_FROM || (fallback.email.endsWith('@example.test') ? 'onboarding@resend.dev' : fallback.email);
   const response = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: { Authorization: `Bearer ${env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ from: data.sender || fallback.email, to: [data.recipient], subject: data.subject, html: data.body }),
+    body: JSON.stringify({ from, to: [data.recipient], subject: data.subject, html: data.body }),
   });
   if (!response.ok) {
     const details = await response.text();
@@ -29,7 +32,9 @@ export async function deliverEmail(data:{sender:string;recipient:string;subject:
 /** Log configuration faults on startup without making the API unavailable. */
 export async function verifySmtpConfiguration() {
   if (env.RESEND_API_KEY) {
-    console.log('Resend email provider configured; SMTP verification is skipped.');
+    const response = await fetch('https://api.resend.com/domains', { headers: { Authorization: `Bearer ${env.RESEND_API_KEY}` } });
+    if (!response.ok) console.error(`Resend API verification failed (${response.status}).`);
+    else console.log('Resend email provider verified; SMTP verification is skipped.');
     return;
   }
   const uniqueAccounts = [...new Map([fallback, ...accounts].map(account => [account.email, account])).values()];
