@@ -89,7 +89,7 @@ Schedule a campaign several minutes ahead, restart Express and the worker, then 
 
 ## Demo video
 
-Watch the submitted walkthrough: [Email Scheduler demo recording](https://drive.google.com/file/d/10wBRLHBO0oBMSW02Oxnyp-D1UBb4CZ-o/view?usp=sharing).
+Watch the submitted walkthrough: [Email Scheduler demo recording](https://drive.google.com/file/d/1G2hndS20yFeFWoHrPidbay5lZWIHE06q/view?usp=sharing).
 
 ## Submission
 
