@@ -1,4 +1,3 @@
-// @ts-expect-error Next.js handles this global stylesheet import at build time.
 import './globals.css';
 import type { Metadata } from 'next';
 import { AuthProvider } from '../components/AuthProvider';
