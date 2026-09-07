@@ -9,6 +9,7 @@ const schema = z.object({
   ELASTICSEARCH_API_KEY: z.string().default(''), // Added for Elastic Cloud auth
   RESEND_API_KEY: z.string().optional(),
   RESEND_FROM: z.string().optional(),
+  EMAIL_PROVIDER: z.enum(['smtp', 'resend']).default('smtp'),
   SMTP_HOST: z.string(), 
   SMTP_PORT: z.coerce.number().default(587), 
   SMTP_USER: z.string(), 
