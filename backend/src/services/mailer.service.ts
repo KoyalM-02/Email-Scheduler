@@ -8,10 +8,11 @@ const fallback:SmtpAccount={email:mailbox(env.SMTP_FROM),host:env.SMTP_HOST,port
 const transporters=new Map<string,nodemailer.Transporter>();
 function accountFor(sender:string) { return accounts.find(a=>a.email.toLowerCase()===sender.toLowerCase()) || fallback; }
 function transporterFor(account:SmtpAccount) { const key=account.email; let transporter=transporters.get(key); if(!transporter){transporter=nodemailer.createTransport({host:account.host,port:account.port,secure:account.port===465,auth:{user:account.user,pass:account.pass},connectionTimeout:10_000,greetingTimeout:10_000,socketTimeout:30_000});transporters.set(key,transporter);} return transporter; }
-export function availableSenders() { return env.EMAIL_PROVIDER==='resend' ? (env.RESEND_FROM ? [mailbox(env.RESEND_FROM)] : []) : [...new Set([fallback.email,...accounts.map(a=>a.email)])]; }
+export function availableSenders() { return [...new Set([fallback.email,...accounts.map(a=>a.email)])]; }
 async function deliverWithResend(data:{sender:string;recipient:string;subject:string;body:string}) {
-  if (!env.RESEND_FROM) throw new Error('RESEND_FROM is required when Resend is enabled. Set it to an address on a domain verified in Resend, then restart the backend.');
-  const from = env.RESEND_FROM;
+  // Resend permits its onboarding sender for test deliveries to the account
+  // owner. Production domains can override it with RESEND_FROM.
+  const from = env.RESEND_FROM || (fallback.email.endsWith('@example.test') ? 'onboarding@resend.dev' : fallback.email);
   const response = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: { Authorization: `Bearer ${env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
@@ -24,18 +25,13 @@ async function deliverWithResend(data:{sender:string;recipient:string;subject:st
   return response.json();
 }
 export async function deliverEmail(data:{sender:string;recipient:string;subject:string;body:string}) {
-  if (env.EMAIL_PROVIDER==='demo') return { id: `demo-${Date.now()}` };
-  if (env.EMAIL_PROVIDER==='resend') return deliverWithResend(data);
+  if (env.RESEND_API_KEY) return deliverWithResend(data);
   const account=accountFor(data.sender);
   return transporterFor(account).sendMail({ from:data.sender || account.email, to:data.recipient, subject:data.subject, html:data.body });
 }
 /** Log configuration faults on startup without making the API unavailable. */
 export async function verifySmtpConfiguration() {
-  if (env.EMAIL_PROVIDER==='demo') {
-    console.log('Demo email provider enabled; deliveries will be marked SENT without external delivery.');
-    return;
-  }
-  if (env.EMAIL_PROVIDER==='resend') {
+  if (env.RESEND_API_KEY) {
     const response = await fetch('https://api.resend.com/domains', { headers: { Authorization: `Bearer ${env.RESEND_API_KEY}` } });
     if (!response.ok) console.error(`Resend API verification failed (${response.status}).`);
     else console.log('Resend email provider verified; SMTP verification is skipped.');
