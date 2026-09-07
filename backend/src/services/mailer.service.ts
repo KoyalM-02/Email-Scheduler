@@ -9,9 +9,29 @@ const transporters=new Map<string,nodemailer.Transporter>();
 function accountFor(sender:string) { return accounts.find(a=>a.email.toLowerCase()===sender.toLowerCase()) || fallback; }
 function transporterFor(account:SmtpAccount) { const key=account.email; let transporter=transporters.get(key); if(!transporter){transporter=nodemailer.createTransport({host:account.host,port:account.port,secure:account.port===465,auth:{user:account.user,pass:account.pass},connectionTimeout:10_000,greetingTimeout:10_000,socketTimeout:30_000});transporters.set(key,transporter);} return transporter; }
 export function availableSenders() { return [...new Set([fallback.email,...accounts.map(a=>a.email)])]; }
-export async function deliverEmail(data:{sender:string;recipient:string;subject:string;body:string}) { const account=accountFor(data.sender); return transporterFor(account).sendMail({ from:data.sender || account.email, to:data.recipient, subject:data.subject, html:data.body }); }
+async function deliverWithResend(data:{sender:string;recipient:string;subject:string;body:string}) {
+  const response = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ from: data.sender || fallback.email, to: [data.recipient], subject: data.subject, html: data.body }),
+  });
+  if (!response.ok) {
+    const details = await response.text();
+    throw new Error(`Resend delivery failed (${response.status}): ${details}`);
+  }
+  return response.json();
+}
+export async function deliverEmail(data:{sender:string;recipient:string;subject:string;body:string}) {
+  if (env.RESEND_API_KEY) return deliverWithResend(data);
+  const account=accountFor(data.sender);
+  return transporterFor(account).sendMail({ from:data.sender || account.email, to:data.recipient, subject:data.subject, html:data.body });
+}
 /** Log configuration faults on startup without making the API unavailable. */
 export async function verifySmtpConfiguration() {
+  if (env.RESEND_API_KEY) {
+    console.log('Resend email provider configured; SMTP verification is skipped.');
+    return;
+  }
   const uniqueAccounts = [...new Map([fallback, ...accounts].map(account => [account.email, account])).values()];
   for (const account of uniqueAccounts) {
     try {
