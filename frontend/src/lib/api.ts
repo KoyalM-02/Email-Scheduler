@@ -30,7 +30,7 @@ export const api = {
   list: (status?: Status) => request<Email[]>(`/emails${status ? `?status=${status}` : ''}`),
   search: (q: string, status?: string) => request<{ items: Email[] }>(`/emails/search?q=${encodeURIComponent(q)}${status ? `&status=${status}` : ''}`),
   schedule: (body: unknown) => request('/emails/schedule', { method: 'POST', body: JSON.stringify(body) }),
-  senders: () => request<string[]>('/emails/senders'),
+  senders: () => request<string[]>('/emails/senders', { cache: 'no-store' }),
   me: () => request<{ email: string; name?: string; image?: string; slackConnected: boolean }>('/emails/me'),
   disconnectSlack: () => request('/slack/disconnect', { method: 'DELETE' }),
   slackStart: async () => {

@@ -121,4 +121,4 @@ export async function me(req: AuthenticatedRequest, res: Response) {
   res.json({ email: user.email, name: user.name, image: user.image, slackConnected: Boolean(user.slackWebhookUrl) });
 }
 
-export function senders(_: AuthenticatedRequest, res: Response) { res.json(availableSenders()); }
+export function senders(_: AuthenticatedRequest, res: Response) { res.set('Cache-Control', 'no-store'); res.json(availableSenders()); }
