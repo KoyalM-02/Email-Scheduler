@@ -43,6 +43,16 @@ npm run dev
 
 Open the dashboard at `http://localhost:3000`, the API at `http://localhost:4000`, and Bull Board at `http://localhost:4000/admin/queues`.
 
+## Run the email scheduler
+
+1. Sign in with Google.
+2. Click **Compose New Email**.
+3. Add content to the subject and body fields.
+4. Upload a `.csv` file containing email addresses.
+5. Select a schedule date and time 2–3 minutes after the current time.
+6. Click **Schedule**.
+7. Wait for the scheduled email to be sent, then open the **Sent Emails** tab to verify it.
+
 ## Ethereal Email and environment setup
 
 1. Create a test inbox at [Ethereal Email](https://ethereal.email/create).
