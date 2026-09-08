@@ -89,7 +89,10 @@ Schedule a campaign several minutes ahead, restart Express and the worker, then 
 
 ## Demo video
 
-This demo video is a local walkthrough of the app in action and does not include a live production deployment. It shows the scheduling flow, persistence after restart, queue visibility, search, rate limiting, and Slack alert behavior in the running local environment: [Email Scheduler demo recording](https://drive.google.com/file/d/10wBRLHBO0oBMSW02Oxnyp-D1UBb4CZ-o/view?usp=sharing).
+There are two demo types for this project:
+
+- Local demo without deployment: this version shows the app running on the local environment without a live production deployment, covering scheduling, persistence after restart, queue visibility, search, rate limiting, and Slack alerts: [Email Scheduler demo recording](https://drive.google.com/file/d/10wBRLHBO0oBMSW02Oxnyp-D1UBb4CZ-o/view?usp=sharing).
+- Production demo with deployment: if a live deployment is available, the same workflow can be demonstrated on the deployed app with the production URL and live environment access.
 
 ## Submission
 
