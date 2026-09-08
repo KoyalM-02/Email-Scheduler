@@ -89,7 +89,7 @@ Schedule a campaign several minutes ahead, restart Express and the worker, then 
 
 ## Demo video
 
-Watch the submitted walkthrough: [Email Scheduler demo recording](https://drive.google.com/file/d/10wBRLHBO0oBMSW02Oxnyp-D1UBb4CZ-o/view?usp=sharing).
+This demo video is a local walkthrough of the app in action and does not include a live production deployment. It shows the scheduling flow, persistence after restart, queue visibility, search, rate limiting, and Slack alert behavior in the running local environment: [Email Scheduler demo recording](https://drive.google.com/file/d/10wBRLHBO0oBMSW02Oxnyp-D1UBb4CZ-o/view?usp=sharing).
 
 ## Submission
 
