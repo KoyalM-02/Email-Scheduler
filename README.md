@@ -2,6 +2,10 @@
 
 A full-stack cold-email scheduler built for the ReachInbox.ai assignment. It uses BullMQ delayed jobs (never cron), PostgreSQL/Prisma for durable email history, Redis for job and rate-limit state, Elasticsearch for search, and Slack webhooks for live limit alerts.
 
+## Live Demo
+
+[Open Email Scheduler](https://email-scheduler-cyan.vercel.app/)
+
 ## Prerequisites
 
 - Node.js 20 or newer
